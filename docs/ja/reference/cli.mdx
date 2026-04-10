@@ -1,0 +1,57 @@
+---
+title: CLIリファレンス
+description: mcp-runtime-guard コマンドのオプション一覧
+---
+
+## 書式
+
+```bash
+mcp-runtime-guard [options] -- <upstream-command> [upstream-args...]
+```
+
+`--` より後ろはすべて上流MCPサーバーのコマンドとして扱われます。
+
+## オプション
+
+| オプション | 必須 | デフォルト | 説明 |
+|-----------|------|-----------|------|
+| `-p, --policy <path>` | ✓ | — | ポリシーYAMLファイルのパス |
+| `--log-level <level>` | | `info` | ログレベル: `debug` \| `info` \| `warn` |
+| `--log-file <path>` | | — | JSONLファイルへの出力先パス |
+| `-V, --version` | | — | バージョンを表示 |
+| `-h, --help` | | — | ヘルプを表示 |
+
+## 使用例
+
+### 基本
+
+```bash
+mcp-runtime-guard --policy policy.yaml -- npx @modelcontextprotocol/server-filesystem /home/user
+```
+
+### ログファイルつき
+
+```bash
+mcp-runtime-guard \
+  --policy ~/.config/mcp-runtime-guard/policy.yaml \
+  --log-level debug \
+  --log-file ~/.mcp-runtime-guard/audit.jsonl \
+  -- npx @modelcontextprotocol/server-filesystem /home/user
+```
+
+### Pythonサーバーへの適用
+
+```bash
+mcp-runtime-guard --policy policy.yaml -- python3 my-mcp-server.py --port 8080
+```
+
+<Note>
+上流サーバーの `--port` などのオプションが `mcp-runtime-guard` に誤認されることはありません。`--` より後ろはすべて上流コマンドの引数として扱われます。
+</Note>
+
+## 終了コード
+
+| コード | 意味 |
+|--------|------|
+| `0` | 正常終了 |
+| `1` | 設定エラー（ポリシーファイルが見つからない、など） |

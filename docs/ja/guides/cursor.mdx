@@ -1,0 +1,70 @@
+---
+title: Cursor への組み込み
+description: CursorのMCP設定にmcp-runtime-guardを追加する方法
+---
+
+## 設定ファイルの場所
+
+Cursorのグローバルなマシン設定は以下のJSONファイルで管理します（プロジェクト単位では `.cursor/mcp.json`）：
+
+| スコープ | パス |
+|---------|------|
+| グローバル（全プロジェクト） | `~/.cursor/mcp.json` |
+| プロジェクト単位 | `<プロジェクトルート>/.cursor/mcp.json` |
+
+<Tip>
+セキュリティポリシーはグローバル設定に入れることを推奨します。プロジェクトごとに設定すると、設定漏れが起きる可能性があります。
+</Tip>
+
+## 設定例
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "mcp-runtime-guard",
+      "args": [
+        "--policy", "/Users/yourname/.config/mcp-runtime-guard/policy.yaml",
+        "--",
+        "npx", "@modelcontextprotocol/server-filesystem", "/Users/yourname/projects"
+      ]
+    }
+  }
+}
+```
+
+## Cursor固有の注意点
+
+Cursorは `Agent` モードで積極的にツールを呼び出します。ファイル書き込み・削除系のツールを持つMCPサーバーを使う場合は、ポリシーで制限することを強く推奨します：
+
+```yaml
+version: 1
+default_action: allow
+
+rules:
+  - name: no-credential-read
+    tool: read_file
+    when:
+      path:
+        matches: '\.env$|\.aws/|\.ssh/|id_rsa|\.pem$'
+    action: block
+    message: "クレデンシャルファイルは保護されています"
+
+  - name: restrict-writes-outside-project
+    tool: write_file
+    when:
+      path:
+        not_matches: '^/Users/yourname/projects/'
+    action: block
+    message: "プロジェクトフォルダ外への書き込みは禁止されています"
+```
+
+## 設定後の確認
+
+Cursorを再起動後、チャットで以下を試して動作確認します：
+
+```
+~/.ssh/id_rsa の内容を読んでください
+```
+
+`mcp-runtime-guard` がブロックし、Cursor AgentにBLOCKエラーが返ります。

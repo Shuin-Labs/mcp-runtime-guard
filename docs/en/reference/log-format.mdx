@@ -1,0 +1,49 @@
+---
+title: Log Format
+description: Format specification for stderr output and JSONL file logs
+---
+
+## stderr output (real-time)
+
+```
+[mcp-runtime-guard] BLOCK  write_file   {"path":"/home/user/.env"}       rule=no-credential-read
+[mcp-runtime-guard] ALLOW  read_file    {"path":"/tmp/data.json"}
+[mcp-runtime-guard] BLOCK  fetch        {"url":"https://evil.example.com"} rule=restrict-fetch
+[mcp-runtime-guard] INFO   Starting proxy → npx @modelcontextprotocol/server-filesystem /home/user
+```
+
+## JSONL file (audit log)
+
+When `--log-file` is specified, one JSON object per line is written:
+
+```jsonl
+{"ts":"2026-04-07T10:00:01Z","action":"BLOCK","tool":"write_file","args":{"path":"/home/user/.env"},"rule":"no-credential-read","message":"Credential files are protected by mcp-runtime-guard"}
+{"ts":"2026-04-07T10:00:02Z","action":"ALLOW","tool":"read_file","args":{"path":"/tmp/data.json"},"rule":null,"message":null}
+```
+
+## JSONL fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `ts` | string | ISO 8601 timestamp |
+| `action` | `"ALLOW"` \| `"BLOCK"` | Applied action |
+| `tool` | string | Name of the tool that was called |
+| `args` | object | Arguments passed to the tool |
+| `rule` | string \| null | Name of the matched rule (null if no match) |
+| `message` | string \| null | Message from the matched rule |
+
+## Block response to AI
+
+When a tool call is blocked, the AI receives an MCP `CallToolResult`:
+
+```json
+{
+  "content": [{
+    "type": "text",
+    "text": "[mcp-runtime-guard] BLOCKED: Credential files are protected by mcp-runtime-guard (rule: no-credential-read)"
+  }],
+  "isError": true
+}
+```
+
+The AI receives this error and decides its next action.

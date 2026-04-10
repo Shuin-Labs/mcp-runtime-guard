@@ -1,0 +1,111 @@
+---
+title: Claude Desktop への組み込み
+description: Claude DesktopのMCP設定にmcp-runtime-guardを追加する方法
+---
+
+## 設定ファイルの場所
+
+| OS | パス |
+|----|------|
+| macOS | `~/Library/Application Support/Claude/claude_desktop_config.json` |
+| Windows | `%APPDATA%\Claude\claude_desktop_config.json` |
+
+## 基本的な設定パターン
+
+任意のMCPサーバーを `mcp-runtime-guard` 経由にするには、コマンドを以下のように変更します：
+
+```json
+{
+  "mcpServers": {
+    "your-server": {
+      "command": "mcp-runtime-guard",
+      "args": [
+        "--policy", "/path/to/policy.yaml",
+        "--",
+        "<元のコマンド>", "<元の引数...>"
+      ]
+    }
+  }
+}
+```
+
+## 複数サーバーへの適用
+
+複数のMCPサーバーそれぞれに適用できます：
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "mcp-runtime-guard",
+      "args": [
+        "--policy", "~/.config/mcp-runtime-guard/policy.yaml",
+        "--",
+        "npx", "@modelcontextprotocol/server-filesystem", "/Users/yourname"
+      ]
+    },
+    "github": {
+      "command": "mcp-runtime-guard",
+      "args": [
+        "--policy", "~/.config/mcp-runtime-guard/policy.yaml",
+        "--",
+        "npx", "@modelcontextprotocol/server-github"
+      ]
+    }
+  }
+}
+```
+
+<Tip>
+同一のポリシーファイルを複数サーバーで共有できます。サーバーごとに別ポリシーを使いたい場合は `--policy` のパスを変えてください。
+</Tip>
+
+## ログファイルの有効化
+
+操作履歴をJSONL形式でファイルに保存するには `--log-file` オプションを追加します：
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "mcp-runtime-guard",
+      "args": [
+        "--policy", "~/.config/mcp-runtime-guard/policy.yaml",
+        "--log-file", "~/.mcp-runtime-guard/audit.jsonl",
+        "--",
+        "npx", "@modelcontextprotocol/server-filesystem", "/Users/yourname"
+      ]
+    }
+  }
+}
+```
+
+## トラブルシューティング
+
+<AccordionGroup>
+  <Accordion title="Claude Desktopがサーバーに接続できない">
+    `mcp-runtime-guard` コマンドがPATHに存在するか確認してください：
+
+    ```bash
+    which mcp-runtime-guard
+    ```
+
+    見つからない場合はフルパスで指定します：
+
+    ```json
+    "command": "/usr/local/bin/mcp-runtime-guard"
+    ```
+  </Accordion>
+
+  <Accordion title="すべてのツール呼び出しがブロックされる">
+    ポリシーファイルの `default_action` を確認してください。`block` になっている場合、ルールにマッチしない呼び出しもすべてブロックされます。
+
+    ```yaml
+    default_action: allow  # ← これを確認
+    ```
+  </Accordion>
+
+  <Accordion title="ログが出力されない">
+    Claude Desktopはstderrを表示しない場合があります。`--log-file` でファイルに出力するか、ターミナルから直接起動して確認してください。
+  </Accordion>
+</AccordionGroup>

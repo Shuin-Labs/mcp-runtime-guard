@@ -1,0 +1,162 @@
+---
+title: Policy YAML Reference
+description: All fields and syntax for policy.yaml
+---
+
+## File structure
+
+```yaml
+version: 1
+default_action: allow  # allow | block
+rules:
+  - ...
+logging:
+  level: info
+  file: ~/.mcp-runtime-guard/audit.jsonl
+```
+
+## Top-level fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `version` | number | ✓ | Schema version. Currently only `1` |
+| `default_action` | `allow` \| `block` | | Action for calls that match no rule (default: `allow`) |
+| `rules` | Rule[] | | Array of rules, evaluated top-to-bottom — first match wins |
+| `logging` | LoggingConfig | | Logging configuration |
+
+## Rule syntax
+
+### Exact tool name match
+
+```yaml
+rules:
+  - name: no-write
+    tool: write_file
+    action: block
+```
+
+### Tool name regex match
+
+```yaml
+rules:
+  - name: no-shell
+    tool:
+      matches: 'execute_command|run_shell|bash|eval'
+    action: block
+```
+
+### Argument condition
+
+```yaml
+rules:
+  - name: no-credential-read
+    tool: read_file
+    when:
+      path:
+        matches: '\.env$|\.aws/|\.ssh/'
+    action: block
+    message: "Credential files are protected by mcp-runtime-guard"
+```
+
+### Whitelist with not_matches
+
+```yaml
+rules:
+  - name: restrict-fetch
+    tool: fetch
+    when:
+      url:
+        not_matches: '^https://api\.github\.com/'
+    action: block
+    message: "External requests restricted to api.github.com"
+```
+
+## Rule fields
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | string | ✓ | Rule identifier (recorded in logs) |
+| `tool` | string \| `{matches: string}` | ✓ | Tool name to match |
+| `when` | Record\<string, Condition\> | | Argument conditions (AND evaluated) |
+| `action` | `allow` \| `block` | ✓ | Action when matched |
+| `message` | string | | Message returned to AI when blocked |
+
+## Condition fields
+
+| Field | Description |
+|-------|-------------|
+| `matches` | True if argument value matches the regex |
+| `not_matches` | True if argument value does NOT match the regex |
+
+<Note>
+If an argument is absent, its value is treated as an empty string `""`.
+</Note>
+
+## Evaluation logic
+
+```
+Evaluate rules top-to-bottom
+  ↓
+Tool name matches?
+  ↓ YES
+All when conditions match (AND)?
+  ↓ YES
+Apply action → stop
+
+If no rule matches, apply default_action
+```
+
+Multiple `when` conditions all must be satisfied (AND). For OR conditions, split into separate rules.
+
+## Logging config
+
+```yaml
+logging:
+  level: info      # debug | info | warn
+  file: ~/.mcp-runtime-guard/audit.jsonl  # optional
+```
+
+| Field | Description |
+|-------|-------------|
+| `level` | Log verbosity |
+| `file` | Path for JSONL output (stderr only if omitted) |
+
+## Full example
+
+```yaml
+version: 1
+default_action: allow
+
+rules:
+  - name: no-credential-read
+    tool: read_file
+    when:
+      path:
+        matches: '\.env$|\.env\.|\.aws/|\.ssh/|id_rsa|\.pem$'
+    action: block
+    message: "Credential files are protected by mcp-runtime-guard"
+
+  - name: no-shell
+    tool:
+      matches: 'execute_command|run_shell|bash|eval'
+    action: block
+    message: "Shell execution is not allowed"
+
+  - name: restrict-fetch
+    tool: fetch
+    when:
+      url:
+        not_matches: '^https://api\.github\.com/'
+    action: block
+    message: "External requests restricted to api.github.com"
+
+  - name: block-all-writes
+    tool:
+      matches: '.*write.*|.*delete.*|.*remove.*'
+    action: block
+    message: "Write and delete operations are not allowed"
+
+logging:
+  level: info
+  file: ~/.mcp-runtime-guard/audit.jsonl
+```

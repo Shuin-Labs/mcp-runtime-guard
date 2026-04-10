@@ -1,0 +1,53 @@
+---
+title: mcp-runtime-guard とは
+description: AIエージェントのMCPツール呼び出しをポリシーで守るCLIプロキシ
+---
+
+## 概要
+
+`mcp-runtime-guard` は、AIエージェント（Claude Code, Cursor など）と実際のMCPサーバーの間に透過的に挟まるCLIプロキシです。
+
+YAMLで定義したポリシーに違反するツール呼び出しをブロックし、すべての操作を監査ログに記録します。
+
+```
+Claude Code / Cursor
+    │ stdio (JSON-RPC 2.0)
+    ▼
+mcp-runtime-guard  ← ここでポリシーチェック
+    │ stdio (JSON-RPC 2.0)
+    ▼
+実際のMCPサーバー
+```
+
+## なぜ必要か
+
+MCPサーバーはファイルシステム、シェル、外部APIへのアクセスを持ちます。AIエージェントが誤って、あるいは悪意ある指示によって次のような操作を行うリスクがあります：
+
+- `.env` や `~/.ssh/id_rsa` などのクレデンシャルファイルの読み取り
+- シェルコマンドの実行
+- 意図しない外部サービスへのHTTPリクエスト
+
+`mcp-runtime-guard` はこれらをポリシーで防ぎます。
+
+## 主な機能
+
+<CardGroup cols={2}>
+  <Card title="YAMLポリシー" icon="shield">
+    ツール名・引数の正規表現マッチでブロックルールを定義
+  </Card>
+  <Card title="透過的プロキシ" icon="arrow-right-arrow-left">
+    既存のMCPサーバー設定に1行追加するだけで導入完了
+  </Card>
+  <Card title="構造化ログ" icon="file-lines">
+    ALLOW/BLOCKをstderr出力とJSONLファイルに記録
+  </Card>
+  <Card title="ゼロコード変更" icon="wand-magic-sparkles">
+    AIエージェント側もMCPサーバー側も修正不要
+  </Card>
+</CardGroup>
+
+## 次のステップ
+
+<Card title="クイックスタート" icon="rocket" href="/ja/quickstart">
+  5分でClaude Desktopに組み込む
+</Card>

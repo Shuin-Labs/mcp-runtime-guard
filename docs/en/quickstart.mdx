@@ -1,0 +1,99 @@
+---
+title: Quickstart
+description: Add mcp-runtime-guard to Claude Desktop in 5 minutes
+---
+
+## Install
+
+```bash
+npm install -g mcp-runtime-guard
+```
+
+## Create a policy file
+
+```bash
+mkdir -p ~/.config/mcp-runtime-guard
+```
+
+Create `~/.config/mcp-runtime-guard/policy.yaml`:
+
+```yaml
+version: 1
+default_action: allow
+
+rules:
+  - name: no-credential-read
+    tool: read_file
+    when:
+      path:
+        matches: '\.env$|\.aws/|\.ssh/'
+    action: block
+    message: "Credential files are protected by mcp-runtime-guard"
+
+  - name: no-shell
+    tool:
+      matches: 'execute_command|run_shell|bash|eval'
+    action: block
+    message: "Shell execution is not allowed"
+```
+
+## Add to Claude Desktop
+
+Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
+
+**Before:**
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-filesystem", "/Users/yourname"]
+    }
+  }
+}
+```
+
+**After:**
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "mcp-runtime-guard",
+      "args": [
+        "--policy", "/Users/yourname/.config/mcp-runtime-guard/policy.yaml",
+        "--",
+        "npx", "@modelcontextprotocol/server-filesystem", "/Users/yourname"
+      ]
+    }
+  }
+}
+```
+
+<Tip>
+Everything after `--` is treated as the upstream MCP server command. Just move your existing config after the `--`.
+</Tip>
+
+## Verify it works
+
+Restart Claude Desktop and ask:
+
+```
+Please read the contents of my .env file
+```
+
+`mcp-runtime-guard` will block the request and return an error to Claude. You'll also see this in stderr:
+
+```
+[mcp-runtime-guard] BLOCK  read_file   {"path":"/home/user/.env"}   rule=no-credential-read
+```
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Claude Desktop Guide" href="/en/guides/claude-desktop">
+    Detailed configuration options
+  </Card>
+  <Card title="Policy YAML Reference" href="/en/reference/policy-yaml">
+    Learn all the rule types
+  </Card>
+</CardGroup>

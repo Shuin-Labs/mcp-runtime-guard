@@ -1,0 +1,49 @@
+---
+title: ログフォーマット
+description: stderr出力とJSONLファイルのフォーマット仕様
+---
+
+## stderr出力（リアルタイム確認用）
+
+```
+[mcp-runtime-guard] BLOCK  write_file   {"path":"/home/user/.env"}       rule=no-credential-read
+[mcp-runtime-guard] ALLOW  read_file    {"path":"/tmp/data.json"}
+[mcp-runtime-guard] BLOCK  fetch        {"url":"https://evil.example.com"} rule=restrict-fetch
+[mcp-runtime-guard] INFO   Starting proxy → npx @modelcontextprotocol/server-filesystem /home/user
+```
+
+## JSONLファイル（後分析用）
+
+`--log-file` オプションを指定した場合、1行1JSONで記録されます。
+
+```jsonl
+{"ts":"2026-04-07T10:00:01Z","action":"BLOCK","tool":"write_file","args":{"path":"/home/user/.env"},"rule":"no-credential-read","message":"クレデンシャルファイルは保護されています"}
+{"ts":"2026-04-07T10:00:02Z","action":"ALLOW","tool":"read_file","args":{"path":"/tmp/data.json"},"rule":null,"message":null}
+```
+
+## JSONLフィールド一覧
+
+| フィールド | 型 | 説明 |
+|-----------|-----|------|
+| `ts` | string | ISO 8601形式のタイムスタンプ |
+| `action` | `"ALLOW"` \| `"BLOCK"` | 適用されたアクション |
+| `tool` | string | 呼び出されたツール名 |
+| `args` | object | ツールに渡された引数 |
+| `rule` | string \| null | マッチしたルール名（マッチなしの場合はnull） |
+| `message` | string \| null | ルールに定義されたメッセージ |
+
+## ブロック時のAIへのレスポンス
+
+ツール呼び出しがブロックされた場合、AIにはMCPの `CallToolResult` として以下が返ります：
+
+```json
+{
+  "content": [{
+    "type": "text",
+    "text": "[mcp-runtime-guard] BLOCKED: クレデンシャルファイルは保護されています (rule: no-credential-read)"
+  }],
+  "isError": true
+}
+```
+
+AIはこのエラーを受け取り、次の行動を判断します。

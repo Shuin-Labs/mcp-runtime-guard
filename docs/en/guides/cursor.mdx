@@ -1,0 +1,68 @@
+---
+title: Cursor Integration
+description: How to add mcp-runtime-guard to Cursor MCP config
+---
+
+## Config file location
+
+| Scope | Path |
+|-------|------|
+| Global (all projects) | `~/.cursor/mcp.json` |
+| Project-level | `<project-root>/.cursor/mcp.json` |
+
+<Tip>
+We recommend placing security policies in the global config to ensure consistent enforcement across all projects.
+</Tip>
+
+## Example config
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "mcp-runtime-guard",
+      "args": [
+        "--policy", "/Users/yourname/.config/mcp-runtime-guard/policy.yaml",
+        "--",
+        "npx", "@modelcontextprotocol/server-filesystem", "/Users/yourname/projects"
+      ]
+    }
+  }
+}
+```
+
+## Cursor-specific considerations
+
+Cursor's Agent mode calls tools aggressively. For MCP servers with write or delete capabilities, we strongly recommend restricting writes to your project directory:
+
+```yaml
+version: 1
+default_action: allow
+
+rules:
+  - name: no-credential-read
+    tool: read_file
+    when:
+      path:
+        matches: '\.env$|\.aws/|\.ssh/|id_rsa|\.pem$'
+    action: block
+    message: "Credential files are protected by mcp-runtime-guard"
+
+  - name: restrict-writes-outside-project
+    tool: write_file
+    when:
+      path:
+        not_matches: '^/Users/yourname/projects/'
+    action: block
+    message: "Writes outside the project directory are not allowed"
+```
+
+## Verify it works
+
+After restarting Cursor, ask in chat:
+
+```
+Please read ~/.ssh/id_rsa
+```
+
+`mcp-runtime-guard` will block the request and return a BLOCK error to the Cursor Agent.

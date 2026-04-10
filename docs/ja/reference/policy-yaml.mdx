@@ -1,0 +1,162 @@
+---
+title: ポリシーYAMLリファレンス
+description: policy.yamlの全フィールドと書き方
+---
+
+## ファイル構造
+
+```yaml
+version: 1
+default_action: allow  # allow | block
+rules:
+  - ...
+logging:
+  level: info
+  file: ~/.mcp-runtime-guard/audit.jsonl
+```
+
+## トップレベルフィールド
+
+| フィールド | 型 | 必須 | 説明 |
+|-----------|-----|------|------|
+| `version` | number | ✓ | スキーマバージョン。現在は `1` のみ |
+| `default_action` | `allow` \| `block` | | ルールにマッチしなかった場合の動作（デフォルト: `allow`） |
+| `rules` | Rule[] | | ルールの配列。上から順に評価し、最初のマッチが適用される |
+| `logging` | LoggingConfig | | ログ設定 |
+
+## ルールの書き方
+
+### ツール名の完全一致
+
+```yaml
+rules:
+  - name: no-write
+    tool: write_file
+    action: block
+```
+
+### ツール名の正規表現マッチ
+
+```yaml
+rules:
+  - name: no-shell
+    tool:
+      matches: 'execute_command|run_shell|bash|eval'
+    action: block
+```
+
+### 引数条件付きルール
+
+```yaml
+rules:
+  - name: no-credential-read
+    tool: read_file
+    when:
+      path:
+        matches: '\.env$|\.aws/|\.ssh/'
+    action: block
+    message: "クレデンシャルファイルは保護されています"
+```
+
+### ホワイトリスト（not_matches）
+
+```yaml
+rules:
+  - name: restrict-fetch
+    tool: fetch
+    when:
+      url:
+        not_matches: '^https://api\.github\.com/'
+    action: block
+    message: "外部リクエストはapi.github.comのみ許可"
+```
+
+## Ruleフィールド一覧
+
+| フィールド | 型 | 必須 | 説明 |
+|-----------|-----|------|------|
+| `name` | string | ✓ | ルールの識別名（ログに記録される） |
+| `tool` | string \| `{matches: string}` | ✓ | マッチするツール名 |
+| `when` | Record\<string, Condition\> | | 引数の条件（AND評価） |
+| `action` | `allow` \| `block` | ✓ | マッチ時の動作 |
+| `message` | string | | ブロック時にAIに返すメッセージ |
+
+## Conditionフィールド
+
+| フィールド | 説明 |
+|-----------|------|
+| `matches` | 引数値が正規表現にマッチしたらtrue |
+| `not_matches` | 引数値が正規表現にマッチしなかったらtrue |
+
+<Note>
+引数が存在しない場合、値は空文字列 `""` として扱われます。
+</Note>
+
+## 評価ロジック
+
+```
+rules を上から順に評価
+  ↓
+tool名がマッチ？
+  ↓ YES
+when条件がすべてマッチ（AND）？
+  ↓ YES
+action を適用 → 終了
+
+マッチするルールがなければ default_action を適用
+```
+
+複数の `when` 条件はすべて満たす必要があります（AND）。OR条件が必要な場合はルールを分けて書きます。
+
+## ログ設定
+
+```yaml
+logging:
+  level: info      # debug | info | warn
+  file: ~/.mcp-runtime-guard/audit.jsonl  # 省略可
+```
+
+| フィールド | 説明 |
+|-----------|------|
+| `level` | ログの詳細度 |
+| `file` | JSONLファイルへの出力先パス（省略時はstderrのみ） |
+
+## 完全な例
+
+```yaml
+version: 1
+default_action: allow
+
+rules:
+  - name: no-credential-read
+    tool: read_file
+    when:
+      path:
+        matches: '\.env$|\.env\.|\.aws/|\.ssh/|id_rsa|\.pem$'
+    action: block
+    message: "クレデンシャルファイルは保護されています"
+
+  - name: no-shell
+    tool:
+      matches: 'execute_command|run_shell|bash|eval'
+    action: block
+    message: "シェル実行は許可されていません"
+
+  - name: restrict-fetch
+    tool: fetch
+    when:
+      url:
+        not_matches: '^https://api\.github\.com/'
+    action: block
+    message: "外部リクエストはapi.github.comのみ許可"
+
+  - name: block-all-writes
+    tool:
+      matches: '.*write.*|.*delete.*|.*remove.*'
+    action: block
+    message: "書き込み・削除操作は許可されていません"
+
+logging:
+  level: info
+  file: ~/.mcp-runtime-guard/audit.jsonl
+```

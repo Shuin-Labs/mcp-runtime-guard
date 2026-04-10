@@ -1,0 +1,111 @@
+---
+title: Claude Desktop Integration
+description: How to add mcp-runtime-guard to Claude Desktop MCP config
+---
+
+## Config file location
+
+| OS | Path |
+|----|------|
+| macOS | `~/Library/Application Support/Claude/claude_desktop_config.json` |
+| Windows | `%APPDATA%\Claude\claude_desktop_config.json` |
+
+## Basic pattern
+
+Wrap any MCP server with `mcp-runtime-guard` by changing the command:
+
+```json
+{
+  "mcpServers": {
+    "your-server": {
+      "command": "mcp-runtime-guard",
+      "args": [
+        "--policy", "/path/to/policy.yaml",
+        "--",
+        "<original-command>", "<original-args...>"
+      ]
+    }
+  }
+}
+```
+
+## Multiple servers
+
+Apply to multiple MCP servers independently:
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "mcp-runtime-guard",
+      "args": [
+        "--policy", "~/.config/mcp-runtime-guard/policy.yaml",
+        "--",
+        "npx", "@modelcontextprotocol/server-filesystem", "/Users/yourname"
+      ]
+    },
+    "github": {
+      "command": "mcp-runtime-guard",
+      "args": [
+        "--policy", "~/.config/mcp-runtime-guard/policy.yaml",
+        "--",
+        "npx", "@modelcontextprotocol/server-github"
+      ]
+    }
+  }
+}
+```
+
+<Tip>
+You can share the same policy file across multiple servers, or use different policies per server by changing the `--policy` path.
+</Tip>
+
+## Enable file logging
+
+Add `--log-file` to persist the audit log:
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "mcp-runtime-guard",
+      "args": [
+        "--policy", "~/.config/mcp-runtime-guard/policy.yaml",
+        "--log-file", "~/.mcp-runtime-guard/audit.jsonl",
+        "--",
+        "npx", "@modelcontextprotocol/server-filesystem", "/Users/yourname"
+      ]
+    }
+  }
+}
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Claude Desktop can't connect to the server">
+    Verify `mcp-runtime-guard` is in PATH:
+
+    ```bash
+    which mcp-runtime-guard
+    ```
+
+    If not found, use the full path:
+
+    ```json
+    "command": "/usr/local/bin/mcp-runtime-guard"
+    ```
+  </Accordion>
+
+  <Accordion title="All tool calls are being blocked">
+    Check `default_action` in your policy file. If set to `block`, all calls that don't match any rule will be blocked.
+
+    ```yaml
+    default_action: allow  # ← check this
+    ```
+  </Accordion>
+
+  <Accordion title="No log output visible">
+    Claude Desktop may not show stderr. Use `--log-file` to write to a file, or run from a terminal directly to see stderr output.
+  </Accordion>
+</AccordionGroup>

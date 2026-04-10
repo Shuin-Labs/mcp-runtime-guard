@@ -1,0 +1,101 @@
+---
+title: クイックスタート
+description: 5分でmcp-runtime-guardをClaude Desktopに組み込む
+---
+
+## インストール
+
+```bash
+npm install -g mcp-runtime-guard
+```
+
+## ポリシーファイルを用意する
+
+設定ディレクトリを作成し、サンプルポリシーをコピーします。
+
+```bash
+mkdir -p ~/.config/mcp-runtime-guard
+```
+
+以下の内容で `~/.config/mcp-runtime-guard/policy.yaml` を作成します：
+
+```yaml
+version: 1
+default_action: allow
+
+rules:
+  - name: no-credential-read
+    tool: read_file
+    when:
+      path:
+        matches: '\.env$|\.aws/|\.ssh/'
+    action: block
+    message: "クレデンシャルファイルは保護されています"
+
+  - name: no-shell
+    tool:
+      matches: 'execute_command|run_shell|bash|eval'
+    action: block
+    message: "シェル実行は許可されていません"
+```
+
+## Claude Desktopに組み込む
+
+`~/Library/Application Support/Claude/claude_desktop_config.json` を編集します。
+
+**変更前:**
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["@modelcontextprotocol/server-filesystem", "/Users/yourname"]
+    }
+  }
+}
+```
+
+**変更後:**
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "mcp-runtime-guard",
+      "args": [
+        "--policy", "/Users/yourname/.config/mcp-runtime-guard/policy.yaml",
+        "--",
+        "npx", "@modelcontextprotocol/server-filesystem", "/Users/yourname"
+      ]
+    }
+  }
+}
+```
+
+<Tip>
+`--` より後ろがすべて元のMCPサーバーコマンドです。既存の設定をそのまま `--` の後ろに移動するだけです。
+</Tip>
+
+## 動作確認
+
+Claude Desktopを再起動し、チャットで以下を試します：
+
+```
+.envファイルの内容を読んでください
+```
+
+`mcp-runtime-guard` がブロックし、Claudeにエラーが返ります。同時に、stderrに以下のようなログが出力されます：
+
+```
+[mcp-runtime-guard] BLOCK  read_file   {"path":"/home/user/.env"}   rule=no-credential-read
+```
+
+## 次のステップ
+
+<CardGroup cols={2}>
+  <Card title="Claude Desktop詳細ガイド" href="/ja/guides/claude-desktop">
+    より詳しい設定方法
+  </Card>
+  <Card title="ポリシーYAMLリファレンス" href="/ja/reference/policy-yaml">
+    ルールの書き方を全て学ぶ
+  </Card>
+</CardGroup>

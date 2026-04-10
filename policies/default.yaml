@@ -1,0 +1,43 @@
+version: 1
+
+# Default action for tool calls that don't match any rule.
+# Omitting this field will default to "block" (fail-closed).
+# Explicitly set to "allow" here for development convenience — change to "block" in production.
+default_action: allow
+
+rules:
+  # Block reads of credential files
+  - name: no-credential-read
+    tool: read_file
+    when:
+      path:
+        matches: '\.env$|\.env\.|\.aws/|\.ssh/|id_rsa|\.pem$'
+    action: block
+    message: "Credential files are protected by mcp-runtime-guard"
+
+  # Block shell execution tools
+  - name: no-shell
+    tool:
+      matches: 'execute_command|run_shell|bash|eval'
+    action: block
+    message: "Shell execution is not allowed"
+
+  # Block fetches to non-GitHub domains
+  - name: restrict-fetch
+    tool: fetch
+    when:
+      url:
+        not_matches: '^https://api\.github\.com/'
+    action: block
+    message: "External requests restricted to api.github.com"
+
+  # Block all write/delete/remove operations
+  - name: block-all-writes
+    tool:
+      matches: '.*write.*|.*delete.*|.*remove.*'
+    action: block
+    message: "Write and delete operations are not allowed"
+
+logging:
+  level: info
+  # file: ~/.mcp-runtime-guard/audit.jsonl  # Uncomment to enable file logging

@@ -1,0 +1,57 @@
+---
+title: CLI Reference
+description: All options for the mcp-runtime-guard command
+---
+
+## Usage
+
+```bash
+mcp-runtime-guard [options] -- <upstream-command> [upstream-args...]
+```
+
+Everything after `--` is treated as the upstream MCP server command.
+
+## Options
+
+| Option | Required | Default | Description |
+|--------|----------|---------|-------------|
+| `-p, --policy <path>` | ✓ | — | Path to policy YAML file |
+| `--log-level <level>` | | `info` | Log level: `debug` \| `info` \| `warn` |
+| `--log-file <path>` | | — | Path for JSONL audit log output |
+| `-V, --version` | | — | Print version |
+| `-h, --help` | | — | Print help |
+
+## Examples
+
+### Basic
+
+```bash
+mcp-runtime-guard --policy policy.yaml -- npx @modelcontextprotocol/server-filesystem /home/user
+```
+
+### With file logging
+
+```bash
+mcp-runtime-guard \
+  --policy ~/.config/mcp-runtime-guard/policy.yaml \
+  --log-level debug \
+  --log-file ~/.mcp-runtime-guard/audit.jsonl \
+  -- npx @modelcontextprotocol/server-filesystem /home/user
+```
+
+### Python server
+
+```bash
+mcp-runtime-guard --policy policy.yaml -- python3 my-mcp-server.py --port 8080
+```
+
+<Note>
+Options like `--port` after `--` are never parsed by `mcp-runtime-guard` — they are passed directly to the upstream command.
+</Note>
+
+## Exit codes
+
+| Code | Meaning |
+|------|---------|
+| `0` | Clean exit |
+| `1` | Configuration error (policy file not found, etc.) |

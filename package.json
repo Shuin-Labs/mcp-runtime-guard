@@ -1,0 +1,25 @@
+{
+  "name": "mcp-runtime-guard",
+  "version": "0.1.0",
+  "description": "Policy-based MCP tool call proxy",
+  "type": "module",
+  "bin": {
+    "mcp-runtime-guard": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "latest",
+    "commander": "^12.0.0",
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4",
+    "@types/node": "^20",
+    "typescript": "^5",
+    "vitest": "^2"
+  }
+}

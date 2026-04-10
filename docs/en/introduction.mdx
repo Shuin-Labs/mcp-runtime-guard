@@ -1,0 +1,53 @@
+---
+title: What is mcp-runtime-guard?
+description: A CLI proxy that enforces security policies on MCP tool calls from AI agents
+---
+
+## Overview
+
+`mcp-runtime-guard` is a transparent CLI proxy that sits between AI agents (Claude Code, Cursor, etc.) and real MCP servers.
+
+It blocks tool calls that violate YAML-defined policies and records all operations in an audit log.
+
+```
+Claude Code / Cursor
+    │ stdio (JSON-RPC 2.0)
+    ▼
+mcp-runtime-guard  ← policy enforcement here
+    │ stdio (JSON-RPC 2.0)
+    ▼
+Real MCP Server
+```
+
+## Why you need it
+
+MCP servers have access to the filesystem, shell, and external APIs. AI agents may accidentally — or through malicious instructions — perform operations like:
+
+- Reading credential files (`.env`, `~/.ssh/id_rsa`)
+- Executing shell commands
+- Making HTTP requests to unintended external services
+
+`mcp-runtime-guard` prevents these with policies.
+
+## Key features
+
+<CardGroup cols={2}>
+  <Card title="YAML Policies" icon="shield">
+    Define block rules with regex matching on tool names and arguments
+  </Card>
+  <Card title="Transparent Proxy" icon="arrow-right-arrow-left">
+    Add one line to your existing MCP server config — no other changes needed
+  </Card>
+  <Card title="Structured Logging" icon="file-lines">
+    Records ALLOW/BLOCK events to stderr and optional JSONL file
+  </Card>
+  <Card title="Zero Code Changes" icon="wand-magic-sparkles">
+    No modifications needed to your AI agent or MCP server
+  </Card>
+</CardGroup>
+
+## Next steps
+
+<Card title="Quickstart" icon="rocket" href="/en/quickstart">
+  Add mcp-runtime-guard to Claude Desktop in 5 minutes
+</Card>
