@@ -2,7 +2,24 @@
   "name": "mcp-runtime-guard",
   "version": "0.1.0",
   "description": "Policy-based MCP tool call proxy",
+  "license": "Apache-2.0",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shuin-labs/mcp-runtime-guard.git"
+  },
+  "homepage": "https://github.com/shuin-labs/mcp-runtime-guard#readme",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "proxy",
+    "policy",
+    "security",
+    "ai"
+  ],
+  "files": [
+    "dist"
+  ],
   "bin": {
     "mcp-runtime-guard": "./dist/index.js"
   },
@@ -10,6 +27,10 @@
     "build": "tsc",
     "test": "vitest run",
     "test:watch": "vitest"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "latest",
