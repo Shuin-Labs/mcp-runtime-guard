@@ -1,12 +1,18 @@
-# mcp-runtime-guard
+# MCP Runtime Guard
 
-<a href="README.en.md">English Readme here</a>
+**Language**
+- 🇯🇵 Japanese (このページ)
+- 🌐 [English](README.en.md)
+
+👉 📚 **Docs**
+- 🇯🇵 https://wanderlustinc.mintlify.app/ja/introduction
+- 🌐 https://wanderlustinc.mintlify.app/en/introduction
+
+---
 
 MCPサーバーへのtool callをポリシーに基づいてリアルタイムでブロックするランタイムプロキシ。
 
 AIエージェント（Claude Code、Cursor等）と実MCPサーバーの間に透過的に挟まり、YAMLで定義したルールに違反するtool callを**実行前に**ブロックする。
-
----
 
 ## 仕組み
 
