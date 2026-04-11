@@ -3,6 +3,8 @@ title: クイックスタート
 description: 5分でmcp-runtime-guardをClaude Desktopに組み込む
 ---
 
+import { Aside, Card, CardGrid } from '@astrojs/starlight/components';
+
 ## インストール
 
 ```bash
@@ -71,9 +73,9 @@ rules:
 }
 ```
 
-<Tip>
+<Aside type="tip">
 `--` より後ろがすべて元のMCPサーバーコマンドです。既存の設定をそのまま `--` の後ろに移動するだけです。
-</Tip>
+</Aside>
 
 ## 動作確認
 
@@ -91,11 +93,11 @@ Claude Desktopを再起動し、チャットで以下を試します：
 
 ## 次のステップ
 
-<CardGroup cols={2}>
+<CardGrid>
   <Card title="Claude Desktop詳細ガイド" href="/ja/guides/claude-desktop">
     より詳しい設定方法
   </Card>
   <Card title="ポリシーYAMLリファレンス" href="/ja/reference/policy-yaml">
     ルールの書き方を全て学ぶ
   </Card>
-</CardGroup>
+</CardGrid>

@@ -3,6 +3,8 @@ title: Cursor Integration
 description: How to add mcp-runtime-guard to Cursor MCP config
 ---
 
+import { Aside } from '@astrojs/starlight/components';
+
 ## Config file location
 
 | Scope | Path |
@@ -10,9 +12,9 @@ description: How to add mcp-runtime-guard to Cursor MCP config
 | Global (all projects) | `~/.cursor/mcp.json` |
 | Project-level | `<project-root>/.cursor/mcp.json` |
 
-<Tip>
+<Aside type="tip">
 We recommend placing security policies in the global config to ensure consistent enforcement across all projects.
-</Tip>
+</Aside>
 
 ## Example config
 

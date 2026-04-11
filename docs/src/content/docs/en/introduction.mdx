@@ -3,6 +3,8 @@ title: What is mcp-runtime-guard?
 description: A CLI proxy that enforces security policies on MCP tool calls from AI agents
 ---
 
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
 ## Overview
 
 `mcp-runtime-guard` is a transparent CLI proxy that sits between AI agents (Claude Code, Cursor, etc.) and real MCP servers.
@@ -31,20 +33,20 @@ MCP servers have access to the filesystem, shell, and external APIs. AI agents m
 
 ## Key features
 
-<CardGroup cols={2}>
-  <Card title="YAML Policies" icon="shield">
+<CardGrid>
+  <Card title="YAML Policies" icon="approve-check-circle">
     Define block rules with regex matching on tool names and arguments
   </Card>
-  <Card title="Transparent Proxy" icon="arrow-right-arrow-left">
+  <Card title="Transparent Proxy" icon="seti:config">
     Add one line to your existing MCP server config — no other changes needed
   </Card>
-  <Card title="Structured Logging" icon="file-lines">
+  <Card title="Structured Logging" icon="document">
     Records ALLOW/BLOCK events to stderr and optional JSONL file
   </Card>
-  <Card title="Zero Code Changes" icon="wand-magic-sparkles">
+  <Card title="Zero Code Changes" icon="star">
     No modifications needed to your AI agent or MCP server
   </Card>
-</CardGroup>
+</CardGrid>
 
 ## Next steps
 

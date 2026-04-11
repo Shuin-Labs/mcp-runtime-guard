@@ -3,6 +3,8 @@ title: CLI Reference
 description: All options for the mcp-runtime-guard command
 ---
 
+import { Aside } from '@astrojs/starlight/components';
+
 ## Usage
 
 ```bash
@@ -45,9 +47,9 @@ mcp-runtime-guard \
 mcp-runtime-guard --policy policy.yaml -- python3 my-mcp-server.py --port 8080
 ```
 
-<Note>
+<Aside type="note">
 Options like `--port` after `--` are never parsed by `mcp-runtime-guard` — they are passed directly to the upstream command.
-</Note>
+</Aside>
 
 ## Exit codes
 

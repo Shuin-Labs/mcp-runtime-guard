@@ -3,6 +3,8 @@ title: Claude Desktop Integration
 description: How to add mcp-runtime-guard to Claude Desktop MCP config
 ---
 
+import { Aside } from '@astrojs/starlight/components';
+
 ## Config file location
 
 | OS | Path |
@@ -56,9 +58,9 @@ Apply to multiple MCP servers independently:
 }
 ```
 
-<Tip>
+<Aside type="tip">
 You can share the same policy file across multiple servers, or use different policies per server by changing the `--policy` path.
-</Tip>
+</Aside>
 
 ## Enable file logging
 
@@ -82,30 +84,37 @@ Add `--log-file` to persist the audit log:
 
 ## Troubleshooting
 
-<AccordionGroup>
-  <Accordion title="Claude Desktop can't connect to the server">
-    Verify `mcp-runtime-guard` is in PATH:
+<details>
+<summary>Claude Desktop can't connect to the server</summary>
 
-    ```bash
-    which mcp-runtime-guard
-    ```
+Verify `mcp-runtime-guard` is in PATH:
 
-    If not found, use the full path:
+```bash
+which mcp-runtime-guard
+```
 
-    ```json
-    "command": "/usr/local/bin/mcp-runtime-guard"
-    ```
-  </Accordion>
+If not found, use the full path:
 
-  <Accordion title="All tool calls are being blocked">
-    Check `default_action` in your policy file. If set to `block`, all calls that don't match any rule will be blocked.
+```json
+"command": "/usr/local/bin/mcp-runtime-guard"
+```
 
-    ```yaml
-    default_action: allow  # ← check this
-    ```
-  </Accordion>
+</details>
 
-  <Accordion title="No log output visible">
-    Claude Desktop may not show stderr. Use `--log-file` to write to a file, or run from a terminal directly to see stderr output.
-  </Accordion>
-</AccordionGroup>
+<details>
+<summary>All tool calls are being blocked</summary>
+
+Check `default_action` in your policy file. If set to `block`, all calls that don't match any rule will be blocked.
+
+```yaml
+default_action: allow  # ← check this
+```
+
+</details>
+
+<details>
+<summary>No log output visible</summary>
+
+Claude Desktop may not show stderr. Use `--log-file` to write to a file, or run from a terminal directly to see stderr output.
+
+</details>

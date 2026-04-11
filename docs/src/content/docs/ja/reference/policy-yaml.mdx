@@ -3,6 +3,8 @@ title: ポリシーYAMLリファレンス
 description: policy.yamlの全フィールドと書き方
 ---
 
+import { Aside } from '@astrojs/starlight/components';
+
 ## ファイル構造
 
 ```yaml
@@ -88,9 +90,9 @@ rules:
 | `matches` | 引数値が正規表現にマッチしたらtrue |
 | `not_matches` | 引数値が正規表現にマッチしなかったらtrue |
 
-<Note>
+<Aside type="note">
 引数が存在しない場合、値は空文字列 `""` として扱われます。
-</Note>
+</Aside>
 
 ## 評価ロジック
 

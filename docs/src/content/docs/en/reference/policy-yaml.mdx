@@ -3,6 +3,8 @@ title: Policy YAML Reference
 description: All fields and syntax for policy.yaml
 ---
 
+import { Aside } from '@astrojs/starlight/components';
+
 ## File structure
 
 ```yaml
@@ -88,9 +90,9 @@ rules:
 | `matches` | True if argument value matches the regex |
 | `not_matches` | True if argument value does NOT match the regex |
 
-<Note>
+<Aside type="note">
 If an argument is absent, its value is treated as an empty string `""`.
-</Note>
+</Aside>
 
 ## Evaluation logic
 
