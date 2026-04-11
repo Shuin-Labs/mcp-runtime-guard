@@ -5,8 +5,8 @@
 - 🌐 [English](README.en.md)
 
 👉 📚 **Docs**
-- 🇯🇵 https://wanderlustinc.mintlify.app/ja/introduction
-- 🌐 https://wanderlustinc.mintlify.app/en/introduction
+- 🇯🇵 coming soon...
+- 🌐 coming soon...
 
 ---
 
