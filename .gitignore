@@ -3,3 +3,4 @@ dist/
 .claude/
 docs/superpowers/
 docs/design/
+docs/.astro/

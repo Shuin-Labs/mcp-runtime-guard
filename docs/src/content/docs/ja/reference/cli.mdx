@@ -3,6 +3,8 @@ title: CLIリファレンス
 description: mcp-runtime-guard コマンドのオプション一覧
 ---
 
+import { Aside } from '@astrojs/starlight/components';
+
 ## 書式
 
 ```bash
@@ -45,9 +47,9 @@ mcp-runtime-guard \
 mcp-runtime-guard --policy policy.yaml -- python3 my-mcp-server.py --port 8080
 ```
 
-<Note>
+<Aside type="note">
 上流サーバーの `--port` などのオプションが `mcp-runtime-guard` に誤認されることはありません。`--` より後ろはすべて上流コマンドの引数として扱われます。
-</Note>
+</Aside>
 
 ## 終了コード
 

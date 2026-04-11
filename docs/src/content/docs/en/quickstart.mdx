@@ -3,6 +3,8 @@ title: Quickstart
 description: Add mcp-runtime-guard to Claude Desktop in 5 minutes
 ---
 
+import { Aside, Card, CardGrid } from '@astrojs/starlight/components';
+
 ## Install
 
 ```bash
@@ -69,9 +71,9 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
 }
 ```
 
-<Tip>
+<Aside type="tip">
 Everything after `--` is treated as the upstream MCP server command. Just move your existing config after the `--`.
-</Tip>
+</Aside>
 
 ## Verify it works
 
@@ -89,11 +91,11 @@ Please read the contents of my .env file
 
 ## Next steps
 
-<CardGroup cols={2}>
+<CardGrid>
   <Card title="Claude Desktop Guide" href="/en/guides/claude-desktop">
     Detailed configuration options
   </Card>
   <Card title="Policy YAML Reference" href="/en/reference/policy-yaml">
     Learn all the rule types
   </Card>
-</CardGroup>
+</CardGrid>

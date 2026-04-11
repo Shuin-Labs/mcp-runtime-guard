@@ -3,6 +3,8 @@ title: Claude Desktop への組み込み
 description: Claude DesktopのMCP設定にmcp-runtime-guardを追加する方法
 ---
 
+import { Aside } from '@astrojs/starlight/components';
+
 ## 設定ファイルの場所
 
 | OS | パス |
@@ -56,9 +58,9 @@ description: Claude DesktopのMCP設定にmcp-runtime-guardを追加する方法
 }
 ```
 
-<Tip>
+<Aside type="tip">
 同一のポリシーファイルを複数サーバーで共有できます。サーバーごとに別ポリシーを使いたい場合は `--policy` のパスを変えてください。
-</Tip>
+</Aside>
 
 ## ログファイルの有効化
 
@@ -82,8 +84,9 @@ description: Claude DesktopのMCP設定にmcp-runtime-guardを追加する方法
 
 ## トラブルシューティング
 
-<AccordionGroup>
-  <Accordion title="Claude Desktopがサーバーに接続できない">
+<details>
+<summary>Claude Desktopがサーバーに接続できない</summary>
+
     `mcp-runtime-guard` コマンドがPATHに存在するか確認してください：
 
     ```bash
@@ -95,17 +98,20 @@ description: Claude DesktopのMCP設定にmcp-runtime-guardを追加する方法
     ```json
     "command": "/usr/local/bin/mcp-runtime-guard"
     ```
-  </Accordion>
+</details>
 
-  <Accordion title="すべてのツール呼び出しがブロックされる">
+<details>
+<summary>すべてのツール呼び出しがブロックされる</summary>
+
     ポリシーファイルの `default_action` を確認してください。`block` になっている場合、ルールにマッチしない呼び出しもすべてブロックされます。
 
     ```yaml
     default_action: allow  # ← これを確認
     ```
-  </Accordion>
+</details>
 
-  <Accordion title="ログが出力されない">
+<details>
+<summary>ログが出力されない</summary>
+
     Claude Desktopはstderrを表示しない場合があります。`--log-file` でファイルに出力するか、ターミナルから直接起動して確認してください。
-  </Accordion>
-</AccordionGroup>
+</details>
